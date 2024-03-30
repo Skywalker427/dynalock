@@ -16,11 +16,12 @@ class LockReleaseError(Exception):
 
 
 class DynaLock:
-    DEFALUT_LOCK_TTL = 60
+    DEFAULT_LOCK_TTL = 60
 
-    def __init__(self, lock_id, region_name=None, table_name=None):
+    def __init__(self, lock_id, region_name=None, table_name=None, ttl=DEFAULT_LOCK_TTL):
         self.region_name = region_name 
         self.table_name = table_name
+        self.ttl = ttl
 
         if not self.table_name or not self.region_name or not lock_id:
             raise ValueError(
@@ -32,10 +33,10 @@ class DynaLock:
         self.lock_id = lock_id
         self.lock_acquired = False
 
-    def _acquire_lock(self, ttl=DEFALUT_LOCK_TTL):
+    def _acquire_lock(self):
         try:
             self.table.put_item(
-                Item={"LockId": self.lock_id, "TTL": int(time.time()) + ttl},
+                Item={"LockId": self.lock_id, "TTL": int(time.time()) + self.ttl},
                 ConditionExpression="attribute_not_exists(LockID) OR #T < :current_time",
                 ExpressionAttributeNames={"#T": "TTL"},
                 ExpressionAttributeValues={":current_time": int(time.time())},
@@ -62,7 +63,7 @@ class DynaLock:
 
 
     @contextmanager
-    def lock(self, ttl=DEFALUT_LOCK_TTL):
+    def lock(self, ttl=DEFAULT_LOCK_TTL):
         try:
             if self._acquire_lock(ttl):
                 yield self
