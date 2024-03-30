@@ -11,8 +11,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    "boto3>=1.18.0",
-    "botocore>=1.21.0",
+    "boto3>=1.34.74",
+    "botocore>=1.34.74",
 ]
 
 test_requirements = ['pytest>=3', ]

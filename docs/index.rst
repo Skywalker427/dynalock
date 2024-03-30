@@ -1,4 +1,4 @@
-Welcome to dynalock's documentation!
+Welcome to DynaLock's documentation!
 ======================================
 
 .. toctree::
