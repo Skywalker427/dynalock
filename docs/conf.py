@@ -161,5 +161,7 @@ texinfo_documents = [
 
 html_title = "DynaLock Documentation"
 
+html_logo = "./DynaLockLogo.png"
+
 
 
