@@ -1,6 +1,7 @@
 botocore==1.34.74
 boto3==1.34.74
 Sphinx
+sphinx_book_theme
 Jinja2==3.1.3
 
 
