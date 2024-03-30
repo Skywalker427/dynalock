@@ -15,7 +15,7 @@ class LockReleaseError(Exception):
     pass
 
 
-class DynamoDBLock:
+class DynaLock:
     DEFALUT_LOCK_TTL = 60
 
     def __init__(self, lock_id, region_name=None, table_name=None):
