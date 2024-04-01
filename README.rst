@@ -17,7 +17,7 @@
 Distributed locking implementation in python with DynamoDB
 
 Getting Started
-------------
+----------------
 To install DynaLock, simply use pip:
 
 .. code-block:: bash
