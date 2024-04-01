@@ -136,6 +136,7 @@ Here is a declarative example of the table using terraform:
 
       ttl {
         attribute_name = "TTL"
+        enabled        = true
       }
     }
 
