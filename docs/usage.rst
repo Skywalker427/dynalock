@@ -111,52 +111,34 @@ DynamoDB Table Setup
 ---------------------
 
 Before using DynaLock, you need to create a DynamoDB table to store the lock information.
-The table is quite simple should have the following attributes:
+The table is quite simple and should have the following attributes:
 
 - **Partition Key (also known as Hash Key)**: `LockId` (String) - The unique identifier for the lock.
 - **TTL Attribute**: `TTL` (Number) - The Time-to-Live attribute to automatically release the lock after a specified duration.
 
-Here is an example of creating an example table using terraform:
+Here is a declarative example of the table using terraform:
 
-.. code-block:: terraform
-    # Specify the Terraform version and provider requirements
-    terraform {
-    required_providers {
-        aws = {
-        source  = "hashicorp/aws"
-        version = "~> 3.0"
-        }
-    }
+.. code-block:: 
 
-    required_version = ">= 0.12"
-    }
+    resource "aws_dynamodb_table" "lock_table" {
+      name           = "my_lock_table"
+      billing_mode   = "PAY_PER_REQUEST"
+      hash_key       = "LockId"
 
-    # Configure the AWS Provider
-    provider "aws" {
-    region = "eu-west-2" # Specify your AWS region
-    }
-
-    # Create a DynamoDB table
-    resource "aws_dynamodb_table" "example" {
-    name           = "example-table" # Change this to your table name
-    billing_mode   = "PAY_PER_REQUEST"
-    hash_key       = "LockId"
-
-    attribute {
+      attribute {
         name = "LockId"
         type = "S"
-    }
+      }
+      attribute {
+        name = "TTL"
+        type = "N"
+      }
 
-    # Enable TTL
-    ttl {
+      ttl {
         attribute_name = "TTL"
-        enabled        = true
+      }
     }
 
-    tags = {
-        Name = "ExampleTable"
-    }
-    }
 
 
 You can refer to the AWS documentation for more detailed instructions on creating DynamoDB tables.
