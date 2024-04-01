@@ -1,5 +1,6 @@
 import time
 from contextlib import contextmanager
+from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -8,9 +9,24 @@ from .exceptions import LockAcquisitionError, LockAlreadyAcquiredError, LockRele
 
 
 class DynaLock:
-    DEFAULT_LOCK_TTL = 60
+    DEFAULT_LOCK_TTL: int = 60
 
-    def __init__(self, lock_id, region_name=None, table_name=None, ttl=DEFAULT_LOCK_TTL):
+    def __init__(
+        self,
+        lock_id: Optional[str] = None,
+        region_name: Optional[str] = None,
+        table_name: Optional[str] = None,
+        ttl: int = DEFAULT_LOCK_TTL,
+    ) -> None:
+        """
+        Initialize a DynaLock object.
+
+        Args:
+            lock_id (str): The ID of the lock.
+            region_name (str): The name of the AWS region.
+            table_name (str): The name of the DynamoDB table.
+            ttl (int): The time-to-live (TTL) of the lock.
+        """
         self.region_name = region_name 
         self.table_name = table_name
         self.ttl = ttl
@@ -25,11 +41,20 @@ class DynaLock:
         self.lock_id = lock_id
         self.lock_acquired = False
 
-    def _acquire_lock(self):
+    def _acquire_lock(self) -> bool:
+        """
+        Try to acquire the lock.
+
+        Returns:
+            bool: True if the lock was acquired, False otherwise.
+
+        Raises:
+            LockAlreadyAcquiredError: If the lock is already acquired and cannot be acquired until released or expired.
+        """
         try:
             self.table.put_item(
                 Item={"LockId": self.lock_id, "TTL": int(time.time()) + self.ttl},
-                ConditionExpression="attribute_not_exists(LockID) OR #T < :current_time",
+                ConditionExpression="attribute_not_exists(LockId) OR #T < :current_time",
                 ExpressionAttributeNames={"#T": "TTL"},
                 ExpressionAttributeValues={":current_time": int(time.time())},
             )
@@ -41,8 +66,16 @@ class DynaLock:
             else:
                 raise
 
+    def _release_lock(self) -> bool:
+        """
+        Release the lock.
 
-    def _release_lock(self):
+        Returns:
+            bool: True if the lock was released, False otherwise.
+
+        Raises:
+            LockReleaseError: If the lock release failed.
+        """
         if not self.lock_acquired:
             return False
         try:
@@ -52,12 +85,18 @@ class DynaLock:
         except ClientError as e:
             raise LockReleaseError("Failed to release lock.") from e
 
-
-
     @contextmanager
-    def lock(self, ttl=DEFAULT_LOCK_TTL):
+    def lock(self):
+        """
+        Context manager for acquiring and automatically releasing the lock.
+
+        Raises:
+            LockAcquisitionError: If the lock acquisition failed.
+            LockAlreadyAcquiredError: If the lock is already acquired and cannot be acquired until released or expired.
+            LockReleaseError: If the lock release failed.
+        """
         try:
-            if self._acquire_lock(ttl):
+            if self._acquire_lock():
                 yield self
             else:
                 raise LockAcquisitionError("Failed to acquire lock.")
