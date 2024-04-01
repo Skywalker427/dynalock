@@ -4,15 +4,7 @@ from contextlib import contextmanager
 import boto3
 from botocore.exceptions import ClientError
 
-
-class LockAcquisitionError(Exception):
-    pass
-
-class LockAlreadyAcquiredError(Exception):
-    pass
-
-class LockReleaseError(Exception):
-    pass
+from .exceptions import LockAcquisitionError, LockAlreadyAcquiredError, LockReleaseError
 
 
 class DynaLock:
